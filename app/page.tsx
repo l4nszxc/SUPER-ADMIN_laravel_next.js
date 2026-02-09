@@ -229,7 +229,7 @@ export default function Home() {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       disabled={isLoading}
-                      className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 transition-all"
+                      className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 transition-all placeholder:italic"
                     />
                   </div>
                   <div className="space-y-2">
@@ -240,12 +240,12 @@ export default function Home() {
                       <Input
                         id="password"
                         type={showLoginPassword ? "text" : "password"}
-                        placeholder="••••••••"
+                        placeholder="Input Password"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         required
                         disabled={isLoading}
-                        className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 pr-10 transition-all"
+                        className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 pr-10 transition-all placeholder:italic"
                       />
                       <button
                         type="button"
@@ -305,12 +305,12 @@ export default function Home() {
                     <Input
                       id="fullname"
                       type="text"
-                      placeholder="John Doe"
+                      placeholder="e.g. Juan Dela Cruz"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
                       disabled={isRegisterLoading}
-                      className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 transition-all"
+                      className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 transition-all placeholder:italic"
                     />
                   </div>
                   <div className="space-y-2">
@@ -341,7 +341,7 @@ export default function Home() {
                       onChange={(e) => setRegEmail(e.target.value)}
                       required
                       disabled={isRegisterLoading}
-                      className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 transition-all"
+                      className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 transition-all placeholder:italic"
                     />
                   </div>
                   <div className="space-y-2">
@@ -352,12 +352,12 @@ export default function Home() {
                       <Input
                         id="reg-password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
+                        placeholder="Input Password"
                         value={password}
                         onChange={handlePasswordChange}
                         required
                         disabled={isRegisterLoading}
-                        className={`border-2 ${passwordError && password ? 'border-red-500' : 'border-gray-200'} focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 pr-10 transition-all`}
+                        className={`border-2 ${passwordError && password ? 'border-red-500' : 'border-gray-200'} focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 pr-10 transition-all placeholder:italic`}
                       />
                     <button
                       type="button"
@@ -371,7 +371,7 @@ export default function Home() {
                     <p className="text-xs text-red-600 mt-1">{passwordError}</p>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
-                    Min 8 characters, 1 uppercase, 1 special character
+                    Minimum of 8 characters, 1 uppercase, 1 special character
                   </p>
                   </div>
                   <div className="space-y-2">
@@ -382,12 +382,12 @@ export default function Home() {
                       <Input
                         id="confirm-password"
                         type={showConfirmPassword ? "text" : "password"}
-                        placeholder="••••••••"
+                        placeholder="Confirm Password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                         disabled={isRegisterLoading}
-                        className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 pr-10 transition-all"
+                        className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 pr-10 transition-all placeholder:italic"
                       />
                     <button
                       type="button"
