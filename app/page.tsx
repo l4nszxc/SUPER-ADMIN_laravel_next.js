@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 
 export default function Home() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -62,7 +64,7 @@ export default function Home() {
 
     try {
       const res = await fetch(
-        "https://subornative-effectually-vanna.ngrok-free.dev/api/login",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/login`,
         {
           method: "POST",
           headers: {
@@ -81,12 +83,37 @@ export default function Home() {
 
       // Handle successful login
       console.log("Login successful:", data);
-      // You can store token here
-      // Example: localStorage.setItem('token', data.token);
+      // Store token if available
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      // Store user data
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
       setShowLoginSuccess(true);
-      // Redirect after showing success modal
+      
+      // Redirect based on user role after showing success modal
       setTimeout(() => {
-        // Example: router.push('/dashboard');
+        const userRole = data.user?.role || data.role;
+        
+        switch(userRole) {
+          case 'admin':
+            router.push('/admin');
+            break;
+          case 'admin_assistant':
+            router.push('/admin-assistant');
+            break;
+          case 'accounting_head':
+            router.push('/super-admin');
+            break;
+          case 'accounting_assistant':
+            router.push('/super-admin');
+            break;
+          default:
+            router.push('/admin');
+        }
       }, 2000);
       
     } catch (error) {
@@ -117,7 +144,7 @@ export default function Home() {
 
     try {
       const res = await fetch(
-        "https://subornative-effectually-vanna.ngrok-free.dev/api/register",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/register`,
         {
           method: "POST",
           headers: {
