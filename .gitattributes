@@ -1,0 +1,16 @@
+# Defaults for the entire repo
+* text=auto eol=lf
+
+# Documents
+*.md text
+
+# Source code
+*.tsx text
+*.ts text
+*.css text
+*.js text
+*.json text
+
+# Config files
+*.config.* text
+*.lock text
