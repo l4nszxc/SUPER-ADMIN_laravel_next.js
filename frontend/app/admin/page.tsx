@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { 
   Bell, 
   Search, 
@@ -59,9 +60,37 @@ function getInitials(name: string): string {
 }
 
 export default function ModernAdminDashboard() {
+  const router = useRouter();
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [notifications] = useState(3);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      const res = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include cookies
+      });
+
+      if (res.ok) {
+        // Clear localStorage
+        localStorage.removeItem('user_role');
+        // Redirect to login page
+        router.push('/');
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   // Mock user data
   const user = {
@@ -244,9 +273,9 @@ export default function ModernAdminDashboard() {
                     <span>Activity Log</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="py-3 text-red-600">
+                  <DropdownMenuItem className={`py-3 text-red-600 ${isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''}`} onSelect={() => !isLoggingOut && handleLogout()}>
                     <LogOut className="mr-3 h-4 w-4" />
-                    <span>Log out</span>
+                    <span>{isLoggingOut ? "Logging out..." : "Log out"}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

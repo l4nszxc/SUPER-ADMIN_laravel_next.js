@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,11 +14,14 @@ import Image from "next/image";
 
 export default function Home() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [showEmailVerifiedModal, setShowEmailVerifiedModal] = useState(false);
+  const [defaultTab, setDefaultTab] = useState<"login" | "register">("login");
   
   // Login form states
   const [email, setEmail] = useState("");
@@ -36,6 +39,19 @@ export default function Home() {
   // Success modal states
   const [showLoginSuccess, setShowLoginSuccess] = useState(false);
   const [showRegisterSuccess, setShowRegisterSuccess] = useState(false);
+  const [registrationEmail, setRegistrationEmail] = useState("");
+  const [showEmailNotVerified, setShowEmailNotVerified] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+
+  useEffect(() => {
+    // Check if coming from email verification
+    if (searchParams.get('emailVerified') === 'true') {
+      setShowEmailVerifiedModal(true);
+      setDefaultTab('register');
+      // Clean up the URL
+      window.history.replaceState({}, '', '/');
+    }
+  }, [searchParams]);
 
   const validatePassword = (pwd: string) => {
     if (pwd.length < 8) {
@@ -69,7 +85,7 @@ export default function Home() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/login`,
+        `/api/login`,
         {
           method: "POST",
           headers: {
@@ -82,9 +98,26 @@ export default function Home() {
 
       const data = await res.json();
 
-      // Handle 403 - Not verified/approved
+      // Handle 403 - Not verified/approved or email not verified
       if (res.status === 403) {
-        // Redirect to approval pending page
+        // Clear authentication
+        localStorage.removeItem('user_role');
+        
+        // Check if it's email not verified
+        if (data.message && data.message.toLowerCase().includes("email") && data.message.toLowerCase().includes("verif")) {
+          setUnverifiedEmail(email);
+          setShowEmailNotVerified(true);
+          return;
+        }
+        
+        // Store email verification status if available
+        if (data.email_verified_at) {
+          localStorage.setItem('email_verified', 'true');
+        } else {
+          localStorage.setItem('email_verified', 'false');
+        }
+        
+        // Otherwise redirect to approval pending page
         router.push('/super-admin/approval-pending');
         return;
       }
@@ -98,27 +131,34 @@ export default function Home() {
         throw new Error(data.message || "Login failed");
       }
 
-      // Handle successful login
+      // Handle successful login - Check if user is approved
       console.log("Login successful:", data);
-      
-      // Store access token
-      if (data.access_token) {
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('token_type', data.token_type || 'Bearer');
+
+      // Check if user is approved by admin
+      if (!data.is_approved && !data.approved) {
+        // Store email verification status
+        if (data.email_verified_at) {
+          localStorage.setItem('email_verified', 'true');
+        } else {
+          localStorage.setItem('email_verified', 'false');
+        }
+        
+        // Clear authentication
+        localStorage.removeItem('user_role');
+        // User not approved, redirect to approval pending page
+        router.push('/super-admin/approval-pending');
+        return;
       }
-      
-      // Store user role
+
+      // Store user role in localStorage (safe to store non-sensitive data)
       if (data.role) {
         localStorage.setItem('user_role', data.role);
       }
 
       setShowLoginSuccess(true);
       
-      // Redirect based on user role after showing success modal
       setTimeout(() => {
-        const userRole = data.role;
-        
-        switch(userRole) {
+        switch (data.role) {
           case 'admin':
             router.push('/admin');
             break;
@@ -188,11 +228,10 @@ export default function Home() {
 
       // Handle successful registration
       console.log("Registration successful:", data);
+      setRegistrationEmail(regEmail);
       setShowRegisterSuccess(true);
-      // Redirect to approval pending page
-      setTimeout(() => {
-        router.push('/super-admin/approval-pending');
-      }, 2000);
+      // Don't redirect, keep the modal showing
+      // User will click verification link in their email
       
     } catch (error) {
       setRegisterError(error instanceof Error ? error.message : "An error occurred during registration");
@@ -225,7 +264,7 @@ export default function Home() {
           <p className="text-white/70 text-xs sm:text-sm drop-shadow">Enter your credentials to continue</p>
         </div>
 
-        <Tabs defaultValue="login" className="w-full">
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-[#3d0814]/50 backdrop-blur-xl border border-white/10 mb-3 sm:mb-5 p-1 shadow-xl">
             <TabsTrigger 
               value="login" 
@@ -485,21 +524,88 @@ export default function Home() {
       <Dialog open={showRegisterSuccess} onOpenChange={setShowRegisterSuccess}>
         <DialogContent className="w-[90%] max-w-[380px] rounded-2xl">
           <DialogHeader>
-            <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle2 className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
+            <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-blue-100">
+              <CheckCircle2 className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" />
             </div>
             <DialogTitle className="text-center text-xl sm:text-2xl font-bold text-gray-900">
               Registration Successful!
             </DialogTitle>
-            <DialogDescription className="text-center text-sm sm:text-base text-gray-600 px-2">
-              Your account has been created successfully. You can now log in with your credentials.
+            <DialogDescription className="text-center text-sm sm:text-base text-gray-600 px-2 space-y-3 py-3">
+              <p>
+                A verification email has been sent to <span className="font-semibold text-gray-900">{registrationEmail}</span>
+              </p>
+              <p>
+                Please check your email and click the verification link to confirm your account. After verification, please wait for admin approval to access your account.
+              </p>
             </DialogDescription>
           </DialogHeader>
           <Button
-            onClick={() => setShowRegisterSuccess(false)}
+            onClick={() => {
+              setShowRegisterSuccess(false);
+              setFullName("");
+              setRegEmail("");
+              setPassword("");
+              setConfirmPassword("");
+            }}
             className="w-full bg-gradient-to-r from-[#7d1d3d] to-[#5a0a1f] hover:from-[#6a1834] hover:to-[#4a0919] h-11 sm:h-12"
           >
-            Continue
+            OK
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Not Verified Modal */}
+      <Dialog open={showEmailNotVerified} onOpenChange={setShowEmailNotVerified}>
+        <DialogContent className="w-[90%] max-w-[380px] rounded-2xl">
+          <DialogHeader>
+            <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-amber-100">
+              <CheckCircle2 className="h-8 w-8 sm:h-10 sm:w-10 text-amber-600" />
+            </div>
+            <DialogTitle className="text-center text-xl sm:text-2xl font-bold text-gray-900">
+              Email Not Verified
+            </DialogTitle>
+            <DialogDescription className="text-center text-sm sm:text-base text-gray-600 px-2 space-y-3 py-3">
+              <p>
+                Your email address hasn't been verified yet.
+              </p>
+              <p>
+                Please check your inbox for a verification email sent to <span className="font-semibold text-gray-900">{unverifiedEmail}</span> and click the verification link to confirm your account.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <Button
+            onClick={() => setShowEmailNotVerified(false)}
+            className="w-full bg-gradient-to-r from-[#7d1d3d] to-[#5a0a1f] hover:from-[#6a1834] hover:to-[#4a0919] h-11 sm:h-12"
+          >
+            OK
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Verified Successfully Modal */}
+      <Dialog open={showEmailVerifiedModal} onOpenChange={setShowEmailVerifiedModal}>
+        <DialogContent className="w-[90%] max-w-[380px] rounded-2xl">
+          <DialogHeader>
+            <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle2 className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
+            </div>
+            <DialogTitle className="text-center text-xl sm:text-2xl font-bold text-gray-900">
+              Email Verified Successfully!
+            </DialogTitle>
+            <DialogDescription className="text-center text-sm sm:text-base text-gray-600 px-2 space-y-3 py-3">
+              <p>
+                Your email has been successfully verified.
+              </p>
+              <p>
+                Your account is now pending admin approval. You will be able to login once the admin approves your account.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <Button
+            onClick={() => setShowEmailVerifiedModal(false)}
+            className="w-full bg-gradient-to-r from-[#7d1d3d] to-[#5a0a1f] hover:from-[#6a1834] hover:to-[#4a0919] h-11 sm:h-12"
+          >
+            OK
           </Button>
         </DialogContent>
       </Dialog>
