@@ -291,9 +291,13 @@ export default function Home() {
                     />
                     <span className="text-gray-600 group-hover:text-gray-800 transition-colors">Remember me</span>
                   </label>
-                  <a href="#" className="text-[#7d1d3d] hover:text-[#5a0a1f] font-semibold transition-colors">
+                  <button 
+                    type="button"
+                    onClick={() => router.push('/forgot-password')} 
+                    className="text-[#7d1d3d] hover:text-[#5a0a1f] font-semibold transition-colors"
+                  >
                     Forgot password?
-                  </a>
+                  </button>
                 </div>
                   <Button 
                     type="submit"
@@ -384,7 +388,7 @@ export default function Home() {
                         onChange={handlePasswordChange}
                         required
                         disabled={isRegisterLoading}
-                        className={`border-2 ${passwordError && password ? 'border-red-500' : 'border-gray-200'} focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 pr-10 transition-all placeholder:italic`}
+                        className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 rounded-lg h-11 pr-10 transition-all placeholder:italic"
                       />
                     <button
                       type="button"
@@ -394,12 +398,17 @@ export default function Home() {
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-                  {passwordError && password && (
-                    <p className="text-xs text-red-600 mt-1">{passwordError}</p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    Minimum of 8 characters, 1 uppercase, 1 special character
-                  </p>
+                  <div className="text-xs space-y-1 mt-2">
+                    <p className={`${password.length >= 8 ? 'text-green-600' : 'text-gray-500'} transition-colors`}>
+                      ✓ Minimum of 8 characters
+                    </p>
+                    <p className={`${/[A-Z]/.test(password) ? 'text-green-600' : 'text-gray-500'} transition-colors`}>
+                      ✓ 1 uppercase letter
+                    </p>
+                    <p className={`${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'text-green-600' : 'text-gray-500'} transition-colors`}>
+                      ✓ 1 special character
+                    </p>
+                  </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password" className="text-gray-800 font-semibold text-sm">
