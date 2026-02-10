@@ -28,7 +28,6 @@ export default function Home() {
   
   // Registration form states
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isRegisterLoading, setIsRegisterLoading] = useState(false);
@@ -44,6 +43,12 @@ export default function Home() {
     }
     if (!/[A-Z]/.test(pwd)) {
       return "Password must contain at least 1 uppercase letter";
+    }
+    if (!/[a-z]/.test(pwd)) {
+      return "Password must contain at least 1 lowercase letter";
+    }
+    if (!/[0-9]/.test(pwd)) {
+      return "Password must contain at least 1 number";
     }
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) {
       return "Password must contain at least 1 special character";
@@ -77,26 +82,41 @@ export default function Home() {
 
       const data = await res.json();
 
+      // Handle 403 - Not verified/approved
+      if (res.status === 403) {
+        // Redirect to approval pending page
+        router.push('/super-admin/approval-pending');
+        return;
+      }
+
+      // Handle 409 - Already logged in
+      if (res.status === 409) {
+        throw new Error("You are already logged in. Please logout first.");
+      }
+
       if (!res.ok) {
         throw new Error(data.message || "Login failed");
       }
 
       // Handle successful login
       console.log("Login successful:", data);
-      // Store token if available
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-      }
-      // Store user data
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Store access token
+      if (data.access_token) {
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('token_type', data.token_type || 'Bearer');
       }
       
+      // Store user role
+      if (data.role) {
+        localStorage.setItem('user_role', data.role);
+      }
+
       setShowLoginSuccess(true);
       
       // Redirect based on user role after showing success modal
       setTimeout(() => {
-        const userRole = data.user?.role || data.role;
+        const userRole = data.role;
         
         switch(userRole) {
           case 'admin':
@@ -155,8 +175,7 @@ export default function Home() {
             name: fullName,
             email: regEmail,
             password: password,
-            confirm_password: confirmPassword,
-            role: role,
+            password_confirmation: confirmPassword,
           }),
         }
       );
@@ -170,13 +189,9 @@ export default function Home() {
       // Handle successful registration
       console.log("Registration successful:", data);
       setShowRegisterSuccess(true);
-      // Reset form
+      // Redirect to approval pending page
       setTimeout(() => {
-        setFullName("");
-        setRegEmail("");
-        setPassword("");
-        setConfirmPassword("");
-        setRole("");
+        router.push('/super-admin/approval-pending');
       }, 2000);
       
     } catch (error) {
@@ -345,22 +360,6 @@ export default function Home() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="role" className="text-gray-800 font-semibold text-sm">
-                      Role <span className="text-red-500">*</span>
-                    </Label>
-                    <Select value={role} onValueChange={setRole} required disabled={isRegisterLoading}>
-                      <SelectTrigger className="border-2 border-gray-200 focus:border-[#7d1d3d] focus:ring-2 focus:ring-[#7d1d3d]/20 h-11 rounded-lg transition-all">
-                        <SelectValue placeholder="Select your role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="admin_assistant">Admin Assistant</SelectItem>
-                        <SelectItem value="accounting_head">Accounting Head</SelectItem>
-                        <SelectItem value="accounting_assistant">Accounting Assistant</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
                     <Label htmlFor="reg-email" className="text-gray-800 font-semibold text-sm">
                       Email <span className="text-red-500">*</span>
                     </Label>
@@ -400,10 +399,16 @@ export default function Home() {
                   </div>
                   <div className="text-xs space-y-1 mt-2">
                     <p className={`${password.length >= 8 ? 'text-green-600' : 'text-gray-500'} transition-colors`}>
-                      ✓ Minimum of 8 characters
+                      ✓ Minimum 8 characters
                     </p>
                     <p className={`${/[A-Z]/.test(password) ? 'text-green-600' : 'text-gray-500'} transition-colors`}>
                       ✓ 1 uppercase letter
+                    </p>
+                    <p className={`${/[a-z]/.test(password) ? 'text-green-600' : 'text-gray-500'} transition-colors`}>
+                      ✓ 1 lowercase letter
+                    </p>
+                    <p className={`${/[0-9]/.test(password) ? 'text-green-600' : 'text-gray-500'} transition-colors`}>
+                      ✓ 1 number
                     </p>
                     <p className={`${/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'text-green-600' : 'text-gray-500'} transition-colors`}>
                       ✓ 1 special character
