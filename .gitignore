@@ -1,19 +1,27 @@
+# ==========================================
+# FULLSTACK PROJECT - Frontend & Backend
+# ==========================================
+
+# ==========================================
+# FRONTEND (Next.js) IGNORES
+# ==========================================
+
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
-.pnp.js
+frontend/node_modules
+frontend/.pnp
+frontend/.pnp.js
 
 # testing
-/coverage
+frontend/coverage
 
 # next.js
-/.next/
-/out/
+frontend/.next/
+frontend/out/
 
 # production
-/build
+frontend/build
 
 # misc
 .DS_Store
@@ -23,13 +31,107 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-error.log*
 
 # local env files
-.env*.local
+frontend/.env*.local
 
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+frontend/next-env.d.ts
+
+# ==========================================
+# BACKEND (Laravel) IGNORES
+# ==========================================
+
+# Laravel specific
+backend/vendor
+backend/node_modules
+backend/npm-debug.log
+backend/yarn-error.log
+backend/.DS_Store
+backend/Thumbs.db
+
+# Laravel Environment & Key
+backend/.env
+backend/.env.backup
+backend/.env.production
+backend/.env.local
+
+# Laravel storage
+backend/storage/logs/*
+backend/storage/app/*
+!backend/storage/app/public
+!backend/storage/app/.gitkeep
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+
+# Laravel compiled files
+backend/bootstrap/cache/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# OS Files
+.DS_Store
+Thumbs.db
+.env.local
+*.log
+
+# Composer
+backend/composer.lock
+
+# Build & Cache
+backend/.phpunit.result.cache
+backend/phpunit.result.cache
+
+# Database
+*.sqlite
+*.sqlite3
+
+# User uploaded files (optional - uncomment based on your needs)
+# backend/storage/uploads/*
+# !backend/storage/uploads/.gitkeep
+
+# ==========================================
+# GENERAL IGNORES
+# ==========================================
+
+# OS
+.DS_Store
+Thumbs.db
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# npm/yarn
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~

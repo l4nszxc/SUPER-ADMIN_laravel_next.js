@@ -1,0 +1,63 @@
+# Laravel & Backend Specific
+/vendor/
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+composer.lock
+
+# Environment & Configuration
+.env
+.env.backup
+.env.production
+.env.local
+
+# Laravel Framework
+/bootstrap/cache/
+/storage/logs/*
+/storage/app/*
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+!storage/app/public
+!bootstrap/cache/.gitkeep
+!storage/logs/.gitkeep
+
+# IDE & Editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+.project
+.settings/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Editor Swap Files
+*.swp
+*.swo
+*~
+
+# Laravel specific
+/public/hot
+/public/storage
+/storage/*.key
+.phpunit.result.cache
+phpunit.result.cache
+Homestead.json
+Homestead.yaml
+auth.json
+
+# Logs
+*.log
+logs/
+
+# Database
+*.sqlite
+*.sqlite3
+
+# Build artifacts
+*.o
+*.a
+*.so
